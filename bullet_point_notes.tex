@@ -1,0 +1,153 @@
+\documentclass[aps,prd,superscriptaddress,groupedaddress,nofootinbib,nobibnotes]{revtex4}
+
+\usepackage{graphicx}
+\usepackage{dcolumn}
+\usepackage{bm}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{color}
+\usepackage{mathrsfs}
+% \usepackage{comment}
+% \usepackage{url}
+% \usepackage{wick}
+% \usepackage{feynmp}
+% \usepackage{braket}
+
+\setlength{\parindent}{20pt}
+% \setlength{\parskip}{1mm}
+
+\setcounter{topnumber}{1}    % default value is 2.
+\setcounter{bottomnumber}{0} % default value is 1.
+
+\hyphenation{ALPGEN}
+\hyphenation{EVTGEN}
+\hyphenation{PYTHIA}
+
+\newcommand{\kms}[1]{\textcolor{blue}{(KMS: #1)}}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\ba}{\begin{eqnarray}}
+\newcommand{\ea}{\end{eqnarray}}
+\newcommand{\nn}{\nonumber}
+
+\def\tx{{\tilde x}}
+\def\bigoh{{\mathcal O}}
+
+\renewcommand{\baselinestretch}{1.1}
+
+\begin{document}
+
+\title{Fourier transform notes}
+
+\author{Kendrick~M.~Smith}
+\affiliation{Perimeter Institute for Theoretical Physics, Waterloo, ON N2L 2Y5, Canada}
+
+\date{\today}
+
+% \begin{abstract}
+% ABSTRACT HERE
+% \end{abstract}
+% \pacs{}
+
+\maketitle
+
+\section{The complex discrete Fourier transform (cDFT)}
+
+\begin{itemize}
+\item There are many variants of ``the'' Fourier transform, depending on whether the function
+ being transformed is periodic/nonperiodic, discretely/continuously sampled, real/complex, etc.
+ In this section we'll introduce the simplest variant: the {\em periodic, discrete, complex} transform.
+ This variant is sometimes called the ``cDFT'' or just ``DFT''.
+\item The input to the cDFT will be a complex sequence with period $N$, i.e.~a sequence of
+ complex numbers $x_0, x_1, x_2, \cdots$ such that $x_{j+N} = x_j$ for every integer $j$.
+ Such a sequence is uniquely represented by its first $N$ elements $x_0, \cdots, x_{N-1}$,
+ and in software we would use a length-$N$ complex array.
+\item A specific example of a period-$N$ complex sequence is the ``sinusoid''
+\be
+ x_j = e^{(2\pi i / N) j k}   \label{eq:sinusoid}
+\ee
+ where $k$ is an integer and $i=\sqrt{-1}$.  (Note that according to this definition, the
+ constant sequence $x_j = 1$ is considered to be a sinusoid by taking $k=0$ in Eq.~(\ref{eq:sinusoid}).)
+\item Exercise: show that the sinusoid in Eq.~(\ref{eq:sinusoid}) has period $N$ as claimed.
+ Show also that there is a periodicity in $k$: if $k$ and $k'$ differ by an integer multiple of $N$,
+ then $x_j = x'_j$ for all integers $j$.
+\item More generally, we can construct a period-$N$ complex sequence by taking a linear combination
+ of sinusoids: $x_j = \alpha (1) + \beta e^{(2\pi i/N) j} + \gamma e^{(4\pi i/N) j} + \cdots$,
+ where $\alpha, \beta, \gamma, \cdots$ are complex coefficients.
+\item Let's write the most general linear combination of sinusoids as:
+\be
+ x_j = \sum_{k=0}^{N-1} \tx_k e^{(2\pi i / N) j k}  \label{eq:DFT1}
+\ee
+ where $\tx_k = \tx_0, \tx_1, \cdots \tx_{N-1}$ is a sequence of complex coefficients.
+\item Exercise: explain why Eq.~(\ref{eq:DFT1}) is the ``most general linear combination of sinusoids''
+ even though the sum only runs from $k=0$ to $N-1$.  Wouldn't we get a more general form by taking
+ the sum from $k=0$ to $N$ (say)?
+\item There is a very important theorem which says that any period-$N$ complex sequence $x_j$
+ can be represented in the form in Eq.~(\ref{eq:DFT1}), for a suitable choice of coefficients $\tx_k$
+ (its ``Fourier coefficients'').
+ In other words, an arbitrary sequence $x_j$ is the sum of a series of sinusoids (the ``Fourier series'').
+ All of Fourier analysis is based on this theorem!  Proof omitted from notes for now, but I'll
+ write it on the blackboard.
+\item Another fundamental result is a formula which allows the coefficients $\tx_k$ in Eq.~(\ref{eq:DFT1})
+ to be computed from the sequence $x_j$.  The formula is:
+\be
+  \tx_k = \frac{1}{N} \sum_{j=0}^{N-1} x_j e^{-(2\pi i / N) j k}  \label{eq:DFT2}
+\ee
+ Now we have two formulas: Eq.~(\ref{eq:DFT2}) which allows the Fourier coefficients $\tx_k$ to be
+ computed from a sequence $x_j$, and Eq.~(\ref{eq:DFT1}) which allows $x_j$ to be computed from $\tx_k$.
+ The pair of operations $\tx \rightarrow x$ and $\tx \rightarrow x$ are called the ``Fourier transform''
+ and the ``inverse Fourier transform'' respectively.
+ Note that the Fourier transform and its inverse are nearly the same algebraic operation: 
+ the only difference is the replacement $i \rightarrow (-i)$ and the prefactor $(1/N)$.
+\item Exercise: Write a python function to compute the Fourier transform $\tx \rightarrow x$ as defined in Eq.~(\ref{eq:DFT1}),
+ and a function to the inverse Fourier transform as defined in Eq.~(\ref{eq:DFT2}).  For now, write these functions
+ ``by hand'' rather than using python's built-in Fourier transform routines.  Both functions should accept
+ a length-$N$ numpy array and return a length-$N$ numpy array.  Verify that the two functions are inverses of each
+ other, when applied to random input arrays.
+\item The reader should note that different authors define the Fourier transform and its inverse slightly differently.
+ We have put the $(+i)$ in the Fourier transform and the $(-i)$ in the inverse transform~(\ref{eq:DFT2}),
+ but sometimes the opposite convention is used.  We have put the prefactor $(1/N)$ in the inverse transform,
+ and prefactor 1 in the Fourier transform, but the opposite convention can be used.  (Another possible convention is
+ to use prefactor $1/\sqrt{N}$ in both transforms.)
+\item Exercise: Python has built-in Fourier transforms {\tt numpy.fft.fft()} and {\tt numpy.fft.ifft()}.
+ By playing with these routines, figure out what Fourier conventions are used in python.
+ How would you ``doctor'' these routines to agree with the Fourier conventions used in these notes?
+\item Exercise: compare the running time of your ``homegrown'' Fourier transform routines above to python's
+ builtin Fourier transforms, for a few large values of $N$ (say $N=1024, 2048, \cdots$).  You should find that
+ python's transforms are much faster.  This is because there is a non-obvious algorithm (the ``fast Fourier
+ transform'' or FFT) for speeding up the Fourier transform.  The FFT is sometimes said to be the most important
+ algorithm in science!  A useful thing to know is that the FFT is particularly fast when $N$ is a power of two,
+ or more generally a product of small primes (although its asymptotic complexity is $\bigoh(N \log N)$ for all $N$).
+\item Exercise: show from the definition that the FFT is a linear operation, i.e.~if $z_j = \alpha x_j + \beta y_j$,
+ where $\alpha,\beta$ are complex numbers and $f_j,g_j$ are periodic sequences, then 
+ $\tilde z_j = \alpha \tilde x_j + \beta \tilde y_j$.  (This is sometimes called the ``addition theorem''.)
+\end{itemize}
+
+%\begin{figure}
+%\centerline{\includegraphics[width=14cm]{x.pdf}}
+%\caption{xxx}
+%\label{fig:xxx}
+%\end{figure}
+
+% Note: Syntax for clipping a figure is
+% \includegraphics[trim={5cm 0 0 0},clip,...]
+%  where ordering is <left> <lower> <right> <upper>
+
+% \section*{Acknowledgments}
+%
+% Research at Perimeter Institute is supported by the Government of Canada
+% through Industry Canada and by the Province of Ontario through the Ministry of Research \& Innovation.
+% Some computations were performed on the GPC cluster at the SciNet HPC Consortium.
+% SciNet is funded by the Canada Foundation for Innovation under the auspices of Compute Canada,
+% the Government of Ontario, and the University of Toronto.
+% KMS was supported by an NSERC Discovery Grant and an Ontario Early Researcher Award.
+
+% \bibliographystyle{h-physrev}
+% \bibliography{xxx}
+
+% \appendix
+% \section{Appendix}
+
+\end{document}
