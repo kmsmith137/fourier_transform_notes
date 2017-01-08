@@ -252,7 +252,11 @@
  as the positive-frequency coefficients, so we can just ignore them and think of the Fourier coefficients as
  defined in the band $0 \le \nu \le \nu_*$.
 
-\item [ Say something about periodic vs non-periodic boundary conditions here ]
+\item One more comment before getting to the examples.  We have defined the Fourier transform for a {\em periodic}
+ sequence $x_j$, but the timestreams we'll consider as examples aren't necessarily periodic.
+ We will temporarily ignore the issue and just treat the length-$N$ sequence $x_0, \cdots, x_{N-1}$
+ as if it were a periodic sequence.  In fact, this isn't always a safe thing to do, and it can
+ sometimes lead to problems, but we'll return to this later.
 
 \item Summarizing the discussion so far, when we take the Fourier transform of a real-valued time series $x_j$,
   we get a complex-valued array of length $N$.  The second half of this array corresponds (under aliasing)
@@ -279,7 +283,9 @@
   is called the ``power spectrum'' of the time series.
  
   Exercise: Make a plot of the power spectrum of Gaussian white noise, 
-  as a function of $k$.\footnote{For plotting from python, I recommend {\tt matplotlib}.}
+  as a function of $k$.\footnote{I found that I got nice-looking plots by taking 128 frequency
+    bins, uniformly spaced on the $x$-axis, and using a log scale to show the power spectrum on
+    the $y$-axis.  For plotting from python, I recommend {\tt matplotlib}.}
   How does the power spectrum depend on $k$?
 
 \item You should now have code which can plot the power spectrum, given a text file containing
@@ -299,12 +305,39 @@
   white noise added.  Can you guess what its power spectrum might look like?
   Confirm your guess by making a plot.
 
-\item Exercise: {\tt square\_wave.txt} contains a ``square wave'': a signal which periodically switches
+\item Exercise: {\tt noisy\_square\_wave.txt} contains a ``square wave'': a signal which periodically switches
   from -1 to +1.  Can you guess in advance what its power spectrum might look like?  Check by plotting it.
 
-\item [ Von Mises example ]
+\item Exercise: The files {\tt noisy\_von\_mises\_D.txt}, where D is {\tt 0.033}, {\tt 0.066}, or {\tt 0.1},
+  contain periodic sequences of pulses plus Gaussian noise (see figure below).  The pulses have the same
+  period put differ in their ``duty cycle'' $D$, the ratio of the pulse width to the pulse period.  (The
+  pulse heights have been normalized so that the integral of each pulse is the same, so the narrower
+  pulses also have larger amplitudes in the plot.)
 
-\item [ Exercise/comment on sine/cosine example ]
+\centerline{\includegraphics[width=14cm]{scripts/von_mises_pulses_v1.png}}
+
+  How do you think the power spectra of these timestreams might compare?  Overplot the power spectra and check!
+
+\item Exercise: consider a {\em real} periodic sequence $x_j$ of length $N$, where $N$ is odd.
+ By rewriting its Fourier series in terms of sines and cosines, show that it can be written:
+\be
+ x_j = \alpha_0 + \sum_{k=1}^{(N-1)/2} \alpha_k \cos\left( \frac{2\pi j k}{N} \right) + \sum_{k=1}^{(N-1)/2} \beta_k \sin\left( \frac{2\pi j k}{N} \right)  \label{eq:sine_cosine}
+\ee
+ where the $\alpha,\beta$ coefficients are related to the Fourier transform $\tx_k$ by:
+\be
+\alpha_k = \left\{ \begin{array}{cl}
+  \tilde x_0 & \mbox{ if $k=0$} \\
+  2 \mbox{Re}(\tilde x_k) & \mbox{ if $k>0$}
+\end{array} \right.
+  \hspace{1.5cm}
+\beta_k = -2 \mbox{Im}(\tilde x_k)
+\ee
+ What is the analogue of this result in the case where $N$ is even?
+
+ Comment: sometimes in introductory references on the Fourier transform, the sine/cosine expansion in
+ Eq.~(\ref{eq:sine_cosine}) is taken to be the definition of the Fourier transform for a real-valued
+ sequence $x_j$.  We have chosen to define the transform as an expansion in complex exponentials,
+ since this is usually algebraically simpler.
 
 \end{itemize}
 
